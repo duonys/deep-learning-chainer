@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.base import BaseEstimator
 from chainer import Variable, FunctionSet, optimizers, cuda
 import chainer.functions as F
-import utils
+from . import utils
 
 
 class dA(BaseEstimator):
@@ -34,20 +34,21 @@ class dA(BaseEstimator):
         self.activation_func = activation_func
         self.verbose = verbose
         # set gpu
-        if gpu >= 0:
-            cuda.get_device(gpu).use()
+        self.gpu = gpu
+        if self.gpu >= 0:
+            cuda.get_device(self.gpu).use()
             self.model.to_gpu()
-        self.xp = cuda.cupy if gpu >= 0 else np
 
 
     def fit(self, X):
+        xp = cuda.cupy if self.gpu >= 0 else np
         for epoch in range(self.n_epoch):
             utils.disp('epoch: {}'.format(epoch + 1), self.verbose)
 
             perm = np.random.permutation(len(X))
             sum_loss = 0
             for i in range(0, len(X), self.batch_size):
-                X_batch = self.xp.asarray(X[perm[i: i + self.batch_size]])
+                X_batch = xp.asarray(X[perm[i: i + self.batch_size]])
                 loss = self._fit(X_batch)
                 sum_loss += float(loss.data) * len(X_batch)
             utils.disp('train mean loss={}'.format(sum_loss / len(X)), self.verbose)

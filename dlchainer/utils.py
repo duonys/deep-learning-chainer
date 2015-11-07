@@ -1,6 +1,5 @@
 #-*- coding: utf-8 -*-
 
-import logging
 import numpy as np
 from sklearn.datasets import fetch_mldata
 import matplotlib.pyplot as plt

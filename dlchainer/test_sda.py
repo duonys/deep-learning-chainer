@@ -2,8 +2,8 @@
 
 import numpy as np
 from sklearn.metrics import confusion_matrix, accuracy_score
-import utils
-from SdA import SdAClassifier
+from . import utils
+from .SdA import SdAClassifier
 
 
 N_MNIST = 70000
@@ -25,7 +25,7 @@ sda = SdAClassifier(784, [500, 500], 10, [0.3, 0.3], [0.5, 0.5], do_pretrain=Tru
 sda.fit(X_train, y_train)
 
 # test
-pred = sda.predict(X_test).data
+pred = sda.predict(X_test)
 
 cm = confusion_matrix(y_test, pred)
 print(cm)

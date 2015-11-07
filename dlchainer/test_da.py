@@ -2,8 +2,8 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
-from dA import dA
+from . import utils
+from .dA import dA
 
 
 N_MNIST = 70000

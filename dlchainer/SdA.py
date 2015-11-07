@@ -7,8 +7,8 @@ from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.externals.six import with_metaclass
 from chainer import Variable, FunctionSet, optimizers, cuda
 import chainer.functions as F
-from dA import dA
-import utils
+from .dA import dA
+from . import utils
 
 
 class SdAMixin(with_metaclass(ABCMeta, BaseEstimator)):
@@ -40,11 +40,7 @@ class SdAMixin(with_metaclass(ABCMeta, BaseEstimator)):
                 self.n_epoch_pretrain, copy.deepcopy(optimizer),
                 activation_func, verbose, gpu) for i in range(len(n_hiddens) - 1)]
         self.verbose = verbose
-        # setup gpu
         self.gpu = gpu
-        if self.gpu >= 0:
-            cuda.check_cuda_available()
-        self.xp = cuda.cupy if self.gpu >= 0 else np
 
 
     def _check_var(self, var, index, default_val=0.0):
@@ -73,10 +69,11 @@ class SdAMixin(with_metaclass(ABCMeta, BaseEstimator)):
         params = {'l{}'.format(layer + 1): dA.encoder for layer, dA in enumerate(self.dAs)}
         params.update({'l{}'.format(len(self.dAs) + 1): F.Linear(self.dAs[-1].n_hidden, self.n_output)})
         self.model = FunctionSet(**params)
+        self.optimizer.setup(self.model)
         if self.gpu >= 0:
             cuda.get_device(self.gpu).use()
             self.model.to_gpu()
-        self.optimizer.setup(self.model)
+        xp = cuda.cupy if self.gpu >= 0 else np
 
         n = len(X)
         for epoch in range(self.n_epoch_finetune):
@@ -85,8 +82,8 @@ class SdAMixin(with_metaclass(ABCMeta, BaseEstimator)):
             perm = np.random.permutation(n)
             sum_loss = 0
             for i in range(0, n, self.batch_size):
-                X_batch = self.xp.asarray(X[perm[i: i + self.batch_size]])
-                y_batch = self.xp.asarray(y[perm[i: i + self.batch_size]])
+                X_batch = xp.asarray(X[perm[i: i + self.batch_size]])
+                y_batch = xp.asarray(y[perm[i: i + self.batch_size]])
 
                 self.optimizer.zero_grads()
                 y_var = self._forward(X_batch)

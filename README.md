@@ -18,7 +18,7 @@ This script trains two layers perceptron by using MNIST original data.
 You could see weights of hidden layer and output images.
 
 ```
-$ python3 test_da.py
+$ python3 -m dlchainer.test_da
 ```
 
 
@@ -26,5 +26,5 @@ $ python3 test_da.py
 This script trains SdA with MNIST original train data and predict test one.
 
 ```
-$ python3 test_sda.py
+$ python3 -m dlchainer.test_sda
 ```
